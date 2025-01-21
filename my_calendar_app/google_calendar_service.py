@@ -11,6 +11,14 @@ import json
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 CALENDAR_NAME = 'WithAI'
 
+# 定期イベントのパターン定義
+RECURRENCE_PATTERNS = {
+    'daily': 'RRULE:FREQ=DAILY',
+    'weekly': 'RRULE:FREQ=WEEKLY',
+    'monthly': 'RRULE:FREQ=MONTHLY',
+    'weekday': 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'
+}
+
 def get_or_create_calendar(service) -> str:
     """
     'WithAI'カレンダーを取得または作成する
@@ -63,7 +71,9 @@ def get_authenticated_service() -> any:
     service = build('calendar', 'v3', credentials=creds)
     return service
 
-def add_event(service: any, start_datetime_str: str, end_datetime_str: str, title: str, detail: Optional[str] = None, calendar_id: Optional[str] = None) -> Dict:
+def add_event(service: any, start_datetime_str: str, end_datetime_str: str, title: str, 
+              detail: Optional[str] = None, calendar_id: Optional[str] = None,
+              recurrence: Optional[str] = None) -> Dict:
     """
     Google Calendarに新しいイベントを追加
 
@@ -74,6 +84,7 @@ def add_event(service: any, start_datetime_str: str, end_datetime_str: str, titl
         title: イベントのタイトル
         detail: イベントの詳細説明（オプション）
         calendar_id: カレンダーID（オプション）
+        recurrence: 定期イベントのパターン（'daily', 'weekly', 'monthly', 'weekday'）
 
     Returns:
         Dict: 作成されたイベントの情報
@@ -98,12 +109,17 @@ def add_event(service: any, start_datetime_str: str, end_datetime_str: str, titl
         },
     }
 
+    # 定期イベントの設定
+    if recurrence and recurrence in RECURRENCE_PATTERNS:
+        event['recurrence'] = [RECURRENCE_PATTERNS[recurrence]]
+
     event = service.events().insert(calendarId=calendar_id, body=event).execute()
     return event
 
 def update_event(service: any, event_id: str, new_title: Optional[str] = None,
                 new_start_datetime: Optional[str] = None, new_end_datetime: Optional[str] = None,
-                new_detail: Optional[str] = None, calendar_id: Optional[str] = None) -> Dict:
+                new_detail: Optional[str] = None, calendar_id: Optional[str] = None,
+                new_recurrence: Optional[str] = None) -> Dict:
     """
     既存のイベントを更新
 
@@ -115,6 +131,7 @@ def update_event(service: any, event_id: str, new_title: Optional[str] = None,
         new_end_datetime: 新しい終了日時（オプション）
         new_detail: 新しい詳細説明（オプション）
         calendar_id: カレンダーID（オプション）
+        new_recurrence: 新しい定期イベントのパターン（オプション）
 
     Returns:
         Dict: 更新されたイベントの情報
@@ -136,6 +153,11 @@ def update_event(service: any, event_id: str, new_title: Optional[str] = None,
     if new_end_datetime:
         end_datetime = datetime.strptime(new_end_datetime, "%Y-%m-%d %H:%M")
         event['end']['dateTime'] = end_datetime.strftime("%Y-%m-%dT%H:%M:00+09:00")
+    if new_recurrence:
+        if new_recurrence in RECURRENCE_PATTERNS:
+            event['recurrence'] = [RECURRENCE_PATTERNS[new_recurrence]]
+        elif new_recurrence == 'none':
+            event.pop('recurrence', None)
 
     # イベントを更新
     updated_event = service.events().update(

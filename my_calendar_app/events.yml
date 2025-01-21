@@ -1,11 +1,1 @@
-# - id: "google_event_id_1"
-#   title: "ミーティング"
-#   start_datetime: "2024-03-20 15:00"
-#   end_datetime: "2024-03-20 16:00"
-#   detail: "プロジェクトについて"
-#
-# - id: "google_event_id_2"
-#   title: "開発作業"
-#   start_datetime: "2024-03-20 18:00"
-#   end_datetime: "2024-03-20 20:00"
-#   detail: "コードレビューなど" 
+[]
