@@ -186,22 +186,23 @@ def handle_update(event_id: str, new_title: Optional[str] = None,
         print(f"エラー: 予期せぬエラーが発生しました - {str(error)}")
         sys.exit(1)
 
-def handle_delete(event_id: str, events_file: str = "events.yml") -> None:
+def handle_delete(event_id: str, events_file: str = "events.yml", deleted_events_file: str = "deletedevents.yml") -> None:
     """
     イベントを削除
 
     Args:
         event_id: 削除対象のイベントID
         events_file: イベントファイルのパス
+        deleted_events_file: 削除済みイベントファイルのパス
     """
     try:
         # Google Calendarから削除
         service = get_authenticated_service()
         google_delete_event(service, event_id)
 
-        # ローカルからも削除
+        # ローカルからも削除（削除済みイベントとして保存）
         events = load_events(events_file)
-        updated_events = delete_local_event(events, event_id)
+        updated_events = delete_local_event(events, event_id, deleted_events_file)
         save_events(events_file, updated_events)
         
         print(f"\n✨ イベントを削除しました")

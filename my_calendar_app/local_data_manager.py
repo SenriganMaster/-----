@@ -1,6 +1,7 @@
 import os
 import yaml
 from typing import List, Dict, Optional
+from datetime import datetime
 
 def load_events(file_path: str = "events.yml") -> List[Dict]:
     """
@@ -69,15 +70,48 @@ def update_local_event(events_data: List[Dict], event_id: str, new_data: Dict) -
             updated_data.append(event)
     return updated_data
 
-def delete_local_event(events_data: List[Dict], event_id: str) -> List[Dict]:
+def save_deleted_event(event: Dict, deleted_events_file: str = "deletedevents.yml") -> None:
     """
-    指定されたIDのイベントを削除
+    削除されたイベントを保存
+
+    Args:
+        event (Dict): 削除されたイベント情報
+        deleted_events_file (str): 削除済みイベントファイルのパス
+    """
+    # 既存の削除済みイベントを読み込む
+    try:
+        with open(deleted_events_file, 'r', encoding='utf-8') as f:
+            deleted_events = yaml.safe_load(f) or []
+    except FileNotFoundError:
+        deleted_events = []
+
+    # 削除日時を追加
+    event['deleted_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # 削除済みイベントリストに追加
+    deleted_events.append(event)
+
+    # 保存
+    with open(deleted_events_file, 'w', encoding='utf-8') as f:
+        yaml.dump(deleted_events, f, allow_unicode=True)
+
+def delete_local_event(events_data: List[Dict], event_id: str, deleted_events_file: str = "deletedevents.yml") -> List[Dict]:
+    """
+    指定されたIDのイベントを削除し、削除済みイベントファイルに保存
 
     Args:
         events_data (List[Dict]): 既存のイベントリスト
         event_id (str): 削除対象のイベントID
+        deleted_events_file (str): 削除済みイベントファイルのパス
 
     Returns:
         List[Dict]: 更新後のイベントリスト
     """
+    # 削除対象のイベントを見つける
+    deleted_event = next((event for event in events_data if event['id'] == event_id), None)
+    if deleted_event:
+        # 削除済みイベントとして保存
+        save_deleted_event(deleted_event.copy(), deleted_events_file)
+
+    # イベントリストから削除
     return [event for event in events_data if event['id'] != event_id] 
