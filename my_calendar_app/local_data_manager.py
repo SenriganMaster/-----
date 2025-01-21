@@ -1,61 +1,83 @@
-def load_events():
-    """
-    変数:
-        なし
-    返り値:
-        events_data: list (YAMLを読み込んだ結果。各要素はdict)
-    処理内容:
-        - events.ymlを読み込み
-        - list形式で返す。例えば[{'id': 'xxx', 'title': 'xxx', 'start_datetime': '...', 'end_datetime': '...', ...}, ...]
-    """
-    return
+import os
+import yaml
+from typing import List, Dict, Optional
 
-def save_events(events_data):
+def load_events(file_path: str = "events.yml") -> List[Dict]:
     """
-    変数:
-        events_data: list
-    返り値:
-        なし
-    処理内容:
-        - 受け取ったevents_dataをYAMLとしてevents.ymlに書き込む
-    """
-    return
+    YAMLファイルからイベントデータを読み込む
 
-def add_local_event(events_data, event_data):
-    """
-    変数:
-        events_data: list (既存イベントの配列)
-        event_data: dict (新規追加するイベント情報: { 'id': str, 'title': str, 'start_datetime': str, 'end_datetime': str, ... })
-    返り値:
-        updated_data: list (追加後のイベント一覧)
-    処理内容:
-        - event_dataをevents_dataに追加
-        - 返り値として更新された全イベント情報を返す
-    """
-    return
+    Args:
+        file_path (str): 読み込むYAMLファイルのパス。デフォルトは"events.yml"
 
-def update_local_event(events_data, event_id, new_data):
+    Returns:
+        List[Dict]: イベントのリスト。ファイルが存在しない場合は空リスト
     """
-    変数:
-        events_data: list (既存イベントの配列)
-        event_id: str
-        new_data: dict (更新内容を持つ: { 'title': '...', 'start_datetime': '...', 'end_datetime': '...', ... })
-    返り値:
-        updated_data: list (更新後のイベント一覧)
-    処理内容:
-        - events_dataの中から該当IDのイベントを探す
-        - new_dataにあるキーだけ更新し、全体を返す
-    """
-    return
+    if not os.path.exists(file_path):
+        return []
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f)
+        return data if data is not None else []
 
-def delete_local_event(events_data, event_id):
+def save_events(file_path: str, events_data: List[Dict]) -> None:
     """
-    変数:
-        events_data: list
-        event_id: str
-    返り値:
-        updated_data: list (削除後のイベント一覧)
-    処理内容:
-        - 該当IDのイベントをリストから除去して返す
+    イベントデータをYAMLファイルに保存
+
+    Args:
+        file_path (str): 保存先のYAMLファイルパス
+        events_data (List[Dict]): 保存するイベントのリスト
+
+    Returns:
+        None
     """
-    return 
+    with open(file_path, 'w', encoding='utf-8') as f:
+        yaml.dump(events_data, f, allow_unicode=True, sort_keys=False)
+
+def add_local_event(events_data: List[Dict], event_data: Dict) -> List[Dict]:
+    """
+    イベントリストに新しいイベントを追加
+
+    Args:
+        events_data (List[Dict]): 既存のイベントリスト
+        event_data (Dict): 追加する新しいイベントのデータ
+
+    Returns:
+        List[Dict]: 更新後のイベントリスト
+    """
+    return events_data + [event_data]
+
+def update_local_event(events_data: List[Dict], event_id: str, new_data: Dict) -> List[Dict]:
+    """
+    指定されたIDのイベントを更新
+
+    Args:
+        events_data (List[Dict]): 既存のイベントリスト
+        event_id (str): 更新対象のイベントID
+        new_data (Dict): 更新するデータ（部分的な更新可能）
+
+    Returns:
+        List[Dict]: 更新後のイベントリスト
+    """
+    updated_data = []
+    for event in events_data:
+        if event['id'] == event_id:
+            # 既存のイベントデータを更新用データで上書き
+            updated_event = event.copy()
+            updated_event.update(new_data)
+            updated_data.append(updated_event)
+        else:
+            updated_data.append(event)
+    return updated_data
+
+def delete_local_event(events_data: List[Dict], event_id: str) -> List[Dict]:
+    """
+    指定されたIDのイベントを削除
+
+    Args:
+        events_data (List[Dict]): 既存のイベントリスト
+        event_id (str): 削除対象のイベントID
+
+    Returns:
+        List[Dict]: 更新後のイベントリスト
+    """
+    return [event for event in events_data if event['id'] != event_id] 

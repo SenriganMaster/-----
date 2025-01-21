@@ -5,7 +5,7 @@ from ..local_data_manager import load_events, save_events, add_local_event, upda
 def test_load_events_empty_file(test_events_file):
     """空のファイルからの読み込みテスト"""
     # 空のファイルを作成
-    with open(test_events_file, 'w') as f:
+    with open(test_events_file, 'w', encoding='utf-8') as f:
         yaml.dump([], f)
     
     # テスト実行
@@ -16,7 +16,7 @@ def test_load_events_empty_file(test_events_file):
 def test_load_events_with_data(test_events_file, sample_events_data):
     """データが存在する場合の読み込みテスト"""
     # テストデータを書き込み
-    with open(test_events_file, 'w') as f:
+    with open(test_events_file, 'w', encoding='utf-8') as f:
         yaml.dump(sample_events_data, f)
     
     # テスト実行
@@ -32,7 +32,7 @@ def test_save_events(test_events_file, sample_events_data):
     save_events(test_events_file, sample_events_data)
     
     # 保存されたデータを確認
-    with open(test_events_file, 'r') as f:
+    with open(test_events_file, 'r', encoding='utf-8') as f:
         loaded_data = yaml.safe_load(f)
     
     assert loaded_data == sample_events_data
