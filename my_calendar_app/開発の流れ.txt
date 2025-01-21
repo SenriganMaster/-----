@@ -1,0 +1,74 @@
+# 開発方針
+
+## 1. 実装の順序
+
+1. local_data_manager.py（ローカルデータ管理）
+   - YAMLファイルの読み書きが基本的な機能
+   - 外部依存がなく、単体でテスト可能
+   - テスト → 実装の順で進める
+   - 必要なライブラリ: pyyaml
+
+2. google_calendar_service.py（Google Calendar API連携）
+   - 認証周りの実装が必要
+   - モックを使用してテスト可能
+   - 必要なライブラリ:
+     - google-api-python-client
+     - google-auth-httplib2
+     - google-auth-oauthlib
+
+3. calendar_manager.py（CLIインターフェース）
+   - argparseを使用したコマンドライン引数の処理
+   - 上記2つのモジュールを統合
+   - 統合テストも実施
+
+## 2. 各ファイルの実装ステップ
+
+### local_data_manager.py
+1. load_events()のテストと実装
+2. save_events()のテストと実装
+3. add_local_event()のテストと実装
+4. update_local_event()のテストと実装
+5. delete_local_event()のテストと実装
+
+### google_calendar_service.py
+1. get_authenticated_service()のテストと実装
+2. add_event()のテストと実装
+3. update_event()のテストと実装
+4. delete_event()のテストと実装
+5. list_events()のテストと実装
+
+### calendar_manager.py
+1. main()のargparse設定
+2. handle_add()のテストと実装
+3. handle_update()のテストと実装
+4. handle_delete()のテストと実装
+5. handle_list()のテストと実装
+
+## 3. テスト方針
+
+### 単体テスト
+- 各関数ごとにテストケースを作成
+- 正常系と異常系のテストを網羅
+- pytestを使用
+
+### 統合テスト
+- 実際のGoogle Calendar APIとの連携テスト
+- CLIコマンドの実行テスト
+- エラーケースの確認
+
+## 4. 開発環境セットアップ
+
+1. 必要なパッケージのインストール
+```bash
+pip install pytest pyyaml google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+
+2. Google Cloud Consoleでの設定
+- プロジェクト作成
+- OAuth認証情報の設定
+- credentials.jsonのダウンロード
+
+3. テスト環境の準備
+- tests/ディレクトリの作成
+- conftest.pyの設定
+- モックデータの用意 

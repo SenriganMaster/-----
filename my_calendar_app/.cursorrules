@@ -1,0 +1,14 @@
+[DATETIME_FORMAT_RULE]
+- Expected format: "YYYY-MM-DD HH:MM"
+- Validate with: datetime.strptime(user_input, "%Y-%m-%d %H:%M")
+- On error: Prompt user to re-enter a valid date/time.
+
+[COMMAND_USAGE]
+- add: "python calendar_manager.py add <start_datetime> <end_datetime> <title> [detail]"
+- update: "python calendar_manager.py update <id> [--title ...] [--start_datetime ...] [--end_datetime ...] [--detail ...]"
+- delete: "python calendar_manager.py delete <id>"
+- list: "python calendar_manager.py list [--start ...] [--end ...]"
+
+[ERROR_HANDLING]
+- On network failure: Log to error.log
+- On token expiration: Re-run authentication process 
